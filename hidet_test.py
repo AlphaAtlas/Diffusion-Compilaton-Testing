@@ -4,15 +4,15 @@ import torch._dynamo
 import hidet
 
 #Create pipeline
-pipe = StableDiffusionPipeline.from_pretrained("/home/alpha/AI/voltaML-fast-stable-diffusion/data/models/epicrealism_newAge/", torch_dtype=torch.float16)
+#Change path to a remote model
+pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
 pipe = pipe.to("cuda")
 
+#Typical diffusers pipeline optimizations
 print("### Pre Optimization Benchmark:")
 image = pipe("a photo of an astronaut riding a horse on mars").images[0]
 
-
-#Recommended diffusers pipeline optimizations
-pipe.unet.to(memory_format=torch.channels_last)
+pipe.unet.to(memory_format=torch.channels_last) #Unsupported by hidet, but does not seem to make a difference if disabled.
 pipe.enable_vae_tiling()
 pipe.enable_xformers_memory_efficient_attention()
 
@@ -38,5 +38,7 @@ image = pipe("a photo of an astronaut riding a horse on mars").images[0]
 
 print("torch.compile benchmark:")
 image = pipe("a photo of an astronaut riding a horse on mars").images[0]
+
+
 
 
