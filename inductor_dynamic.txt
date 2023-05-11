@@ -1,0 +1,204 @@
+venv ❯ python inductor_test.py
+### Pre Optimization Benchmark:
+100%|████████████████████████████████████████████████████████████████████| 50/50 [00:08<00:00,  5.68it/s]
+/home/alpha/AI/difftest/venv/lib/python3.11/site-packages/diffusers/models/attention_processor.py:182: UserWarning: You have specified using flash attention using xFormers but you have PyTorch 2.0 already installed. We will default to PyTorch's native efficient flash attention implementation provided by PyTorch 2.0.
+  warnings.warn(
+### Post optimization benchmark:
+100%|████████████████████████████████████████████████████████████████████| 50/50 [00:08<00:00,  5.94it/s]
+/home/alpha/.local/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:482: UserWarning: torch.compile support of Python 3.11 is experimental. Program may segfault.
+  warnings.warn(
+### torch.compile warmup:
+100%|████████████████████████████████████████████████████████████████████| 50/50 [00:31<00:00,  1.60it/s]
+torch.compile benchmark:
+100%|████████████████████████████████████████████████████████████████████| 50/50 [00:07<00:00,  6.80it/s]
+  0%|                                                                             | 0/50 [00:00<?, ?it/s]
+╭─────────────────────────────── Traceback (most recent call last) ────────────────────────────────╮
+│ /home/alpha/AI/difftest/inductor_test.py:34 in <module>                                          │
+│                                                                                                  │
+│   31 print("torch.compile benchmark:")                                                           │
+│   32 image = pipe("a photo of an astronaut riding a horse on mars").images[0]                    │
+│   33                                                                                             │
+│ ❱ 34 image = pipe("a photo of an astronaut riding a horse on mars", width = 768).images[0]       │
+│   35                                                                                             │
+│   36                                                                                             │
+│   37                                                                                             │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/utils/_contextlib.py:115 in                │
+│ decorate_context                                                                                 │
+│                                                                                                  │
+│   112 │   @functools.wraps(func)                                                                 │
+│   113 │   def decorate_context(*args, **kwargs):                                                 │
+│   114 │   │   with ctx_factory():                                                                │
+│ ❱ 115 │   │   │   return func(*args, **kwargs)                                                   │
+│   116 │                                                                                          │
+│   117 │   return decorate_context                                                                │
+│   118                                                                                            │
+│                                                                                                  │
+│ /home/alpha/AI/difftest/venv/lib/python3.11/site-packages/diffusers/pipelines/stable_diffusion/p │
+│ ipeline_stable_diffusion.py:696 in __call__                                                      │
+│                                                                                                  │
+│   693 │   │   │   │   latent_model_input = self.scheduler.scale_model_input(latent_model_input   │
+│   694 │   │   │   │                                                                              │
+│   695 │   │   │   │   # predict the noise residual                                               │
+│ ❱ 696 │   │   │   │   noise_pred = self.unet(                                                    │
+│   697 │   │   │   │   │   latent_model_input,                                                    │
+│   698 │   │   │   │   │   t,                                                                     │
+│   699 │   │   │   │   │   encoder_hidden_states=prompt_embeds,                                   │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/nn/modules/module.py:1502 in               │
+│ _wrapped_call_impl                                                                               │
+│                                                                                                  │
+│   1499 │   │   if self._compiled_call_impl is not None:                                          │
+│   1500 │   │   │   return self._compiled_call_impl(*args, **kwargs)  # type: ignore[misc]        │
+│   1501 │   │   else:                                                                             │
+│ ❱ 1502 │   │   │   return self._call_impl(*args, **kwargs)                                       │
+│   1503 │                                                                                         │
+│   1504 │   def _call_impl(self, *args, **kwargs):                                                │
+│   1505 │   │   forward_call = (self._slow_forward if torch._C._get_tracing_state() else self.fo  │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/nn/modules/module.py:1511 in _call_impl    │
+│                                                                                                  │
+│   1508 │   │   if not (self._backward_hooks or self._backward_pre_hooks or self._forward_hooks   │
+│   1509 │   │   │   │   or _global_backward_pre_hooks or _global_backward_hooks                   │
+│   1510 │   │   │   │   or _global_forward_hooks or _global_forward_pre_hooks):                   │
+│ ❱ 1511 │   │   │   return forward_call(*args, **kwargs)                                          │
+│   1512 │   │   # Do not call functions when jit is used                                          │
+│   1513 │   │   full_backward_hooks, non_full_backward_hooks = [], []                             │
+│   1514 │   │   backward_pre_hooks = []                                                           │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:286 in _fn           │
+│                                                                                                  │
+│    283 │   │   │   dynamic_ctx = enable_dynamic(self.dynamic, self.export)                       │
+│    284 │   │   │   dynamic_ctx.__enter__()                                                       │
+│    285 │   │   │   try:                                                                          │
+│ ❱  286 │   │   │   │   return fn(*args, **kwargs)                                                │
+│    287 │   │   │   finally:                                                                      │
+│    288 │   │   │   │   set_eval_frame(prior)                                                     │
+│    289 │   │   │   │   dynamic_ctx.__exit__(None, None, None)                                    │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/nn/modules/module.py:1502 in               │
+│ _wrapped_call_impl                                                                               │
+│                                                                                                  │
+│   1499 │   │   if self._compiled_call_impl is not None:                                          │
+│   1500 │   │   │   return self._compiled_call_impl(*args, **kwargs)  # type: ignore[misc]        │
+│   1501 │   │   else:                                                                             │
+│ ❱ 1502 │   │   │   return self._call_impl(*args, **kwargs)                                       │
+│   1503 │                                                                                         │
+│   1504 │   def _call_impl(self, *args, **kwargs):                                                │
+│   1505 │   │   forward_call = (self._slow_forward if torch._C._get_tracing_state() else self.fo  │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/nn/modules/module.py:1511 in _call_impl    │
+│                                                                                                  │
+│   1508 │   │   if not (self._backward_hooks or self._backward_pre_hooks or self._forward_hooks   │
+│   1509 │   │   │   │   or _global_backward_pre_hooks or _global_backward_hooks                   │
+│   1510 │   │   │   │   or _global_forward_hooks or _global_forward_pre_hooks):                   │
+│ ❱ 1511 │   │   │   return forward_call(*args, **kwargs)                                          │
+│   1512 │   │   # Do not call functions when jit is used                                          │
+│   1513 │   │   full_backward_hooks, non_full_backward_hooks = [], []                             │
+│   1514 │   │   backward_pre_hooks = []                                                           │
+│                                                                                                  │
+│ /home/alpha/AI/difftest/venv/lib/python3.11/site-packages/diffusers/models/unet_2d_condition.py: │
+│ 610 in forward                                                                                   │
+│                                                                                                  │
+│   607 │   │   if isinstance(module, (CrossAttnDownBlock2D, DownBlock2D, CrossAttnUpBlock2D, Up   │
+│   608 │   │   │   module.gradient_checkpointing = value                                          │
+│   609 │                                                                                          │
+│ ❱ 610 │   def forward(                                                                           │
+│   611 │   │   self,                                                                              │
+│   612 │   │   sample: torch.FloatTensor,                                                         │
+│   613 │   │   timestep: Union[torch.Tensor, float, int],                                         │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:286 in _fn           │
+│                                                                                                  │
+│    283 │   │   │   dynamic_ctx = enable_dynamic(self.dynamic, self.export)                       │
+│    284 │   │   │   dynamic_ctx.__enter__()                                                       │
+│    285 │   │   │   try:                                                                          │
+│ ❱  286 │   │   │   │   return fn(*args, **kwargs)                                                │
+│    287 │   │   │   finally:                                                                      │
+│    288 │   │   │   │   set_eval_frame(prior)                                                     │
+│    289 │   │   │   │   dynamic_ctx.__exit__(None, None, None)                                    │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_dynamo/external_utils.py:17 in inner      │
+│                                                                                                  │
+│   14 │                                                                                           │
+│   15 │   @functools.wraps(fn)                                                                    │
+│   16 │   def inner(*args, **kwargs):                                                             │
+│ ❱ 17 │   │   return fn(*args, **kwargs)                                                          │
+│   18 │                                                                                           │
+│   19 │   return inner                                                                            │
+│   20                                                                                             │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_functorch/aot_autograd.py:3348 in forward │
+│                                                                                                  │
+│   3345 │   │   full_args = []                                                                    │
+│   3346 │   │   full_args.extend(params_flat)                                                     │
+│   3347 │   │   full_args.extend(runtime_args)                                                    │
+│ ❱ 3348 │   │   return compiled_fn(full_args)                                                     │
+│   3349 │                                                                                         │
+│   3350 │   # Just for convenience                                                                │
+│   3351 │   forward.zero_grad = mod.zero_grad                                                     │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_functorch/aot_autograd.py:1260 in g       │
+│                                                                                                  │
+│   1257                                                                                           │
+│   1258 def make_boxed_func(f):                                                                   │
+│   1259 │   def g(args):                                                                          │
+│ ❱ 1260 │   │   return f(*args)                                                                   │
+│   1261 │                                                                                         │
+│   1262 │   g._boxed_call = True                                                                  │
+│   1263 │   return g                                                                              │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_functorch/aot_autograd.py:2212 in         │
+│ runtime_wrapper                                                                                  │
+│                                                                                                  │
+│   2209 │   │   │   │   │   disable_amp=disable_amp,                                              │
+│   2210 │   │   │   │   )                                                                         │
+│   2211 │   │   else:                                                                             │
+│ ❱ 2212 │   │   │   all_outs = call_func_with_args(                                               │
+│   2213 │   │   │   │   compiled_fn,                                                              │
+│   2214 │   │   │   │   args,                                                                     │
+│   2215 │   │   │   │   disable_amp=disable_amp,                                                  │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_functorch/aot_autograd.py:1285 in         │
+│ call_func_with_args                                                                              │
+│                                                                                                  │
+│   1282 │   │   guard = torch._C._DisableAutocast()                                               │
+│   1283 │   try:                                                                                  │
+│   1284 │   │   if hasattr(f, "_boxed_call"):                                                     │
+│ ❱ 1285 │   │   │   out = normalize_as_list(f(args))                                              │
+│   1286 │   │   else:                                                                             │
+│   1287 │   │   │   # TODO: Please remove soon                                                    │
+│   1288 │   │   │   # https://github.com/pytorch/pytorch/pull/83137#issuecomment-1211320670       │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_functorch/aot_autograd.py:1372 in         │
+│ rng_functionalization_wrapper                                                                    │
+│                                                                                                  │
+│   1369 │   │   │   out = functionalized_rng_runtime_epilogue(fw_metadata, out)                   │
+│   1370 │   │   │   return out                                                                    │
+│   1371 │   │   else:                                                                             │
+│ ❱ 1372 │   │   │   return compiled_fw(args)                                                      │
+│   1373 │                                                                                         │
+│   1374 │   compiled_fn = create_runtime_wrapper(                                                 │
+│   1375 │   │   rng_functionalization_wrapper,                                                    │
+│                                                                                                  │
+│ /home/alpha/.local/lib/python3.11/site-packages/torch/_inductor/compile_fx.py:380 in run         │
+│                                                                                                  │
+│   377 │   │   for i in check_inputs:                                                             │
+│   378 │   │   │   if new_inputs[i].data_ptr() % ALIGNMENT:                                       │
+│   379 │   │   │   │   new_inputs[i] = clone_preserve_strides(new_inputs[i])                      │
+│ ❱ 380 │   │   return model(new_inputs)                                                           │
+│   381 │                                                                                          │
+│   382 │   return run                                                                             │
+│   383                                                                                            │
+│                                                                                                  │
+│ /tmp/torchinductor_alpha/j4/cj4cua65pheydbembnp2dqroaut6ttz2xgk7dnhsf5tmkc7oricc.py:27 in call   │
+│                                                                                                  │
+│   24 │   arg0_1, arg1_1 = args                                                                   │
+│   25 │   args.clear()                                                                            │
+│   26 │   s0 = arg0_1                                                                             │
+│ ❱ 27 │   return (Ne(Mod(s0, 8), 0), )                                                            │
+│   28                                                                                             │
+│   29                                                                                             │
+│   30 def benchmark_compiled_module(times=10, repeat=10):                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+NameError: name 'Ne' is not defined
