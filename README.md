@@ -1,1 +1,1 @@
-# Diffusion-Compilaton-Testing
+# Some scripts to test torch.compilel backends in stable diffusion
