@@ -1,1 +1,1 @@
-# Some scripts to test torch.compilel backends in stable diffusion
+# Some scripts to test torch.compile backends in stable diffusion
